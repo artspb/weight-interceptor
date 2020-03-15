@@ -3,7 +3,6 @@ package dns
 import (
 	"fmt"
 	"github.com/miekg/dns"
-	"net"
 	"time"
 )
 
@@ -11,9 +10,9 @@ var servers = []string{"8.8.8.8"}
 
 const fallback = "213.174.39.77"
 
-func Lookup(host string) net.IP {
+func Lookup(host string) string {
 	ip := fromCache(host)
-	if ip != nil {
+	if ip != "" {
 		return ip
 	}
 
@@ -30,7 +29,7 @@ func Lookup(host string) net.IP {
 		for _, answer := range response.Answer {
 			switch record := answer.(type) {
 			case *dns.A:
-				ip := record.A
+				ip := record.A.String()
 				toCache(host, ip, time.Duration(record.Hdr.Ttl)*time.Second)
 				return ip
 			}
@@ -38,5 +37,5 @@ func Lookup(host string) net.IP {
 	}
 
 	fmt.Println("Using fallback IP")
-	return net.ParseIP(fallback)
+	return fallback
 }

@@ -2,7 +2,6 @@ package dns
 
 import (
 	"github.com/ReneKroon/ttlcache"
-	"net"
 	"time"
 )
 
@@ -16,15 +15,15 @@ func init() {
 	cache.SkipTtlExtensionOnHit(true)
 }
 
-func fromCache(host string) net.IP {
+func fromCache(host string) string {
 	ip, ok := cache.Get(host)
 	if !ok {
-		return nil
+		return ""
 	}
-	return ip.(net.IP)
+	return ip.(string)
 }
 
-func toCache(host string, ip net.IP, ttl time.Duration) {
+func toCache(host string, ip string, ttl time.Duration) {
 	cache.SetWithTTL(host, ip, ttl)
 }
 
