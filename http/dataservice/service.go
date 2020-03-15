@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 	"weight-interceptor-http/dataservice/hash"
 	"weight-interceptor-http/dns"
 	"weight-interceptor-http/storage"
@@ -49,6 +48,9 @@ func dataService(writer http.ResponseWriter, request *http.Request) {
 	if len(data) > 1 {
 		code = data[:2]
 	}
+	if code == "24" {
+		go func() { storeData(data) }()
+	}
 	responder := responders[code]
 	if responder == nil {
 		log.Printf("Uknown request code: %s\n", request.URL.RequestURI())
@@ -59,7 +61,6 @@ func dataService(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	go func() { storeData(data, response) }()
 }
 
 func extractData(request *http.Request) string {
@@ -70,13 +71,8 @@ func extractData(request *http.Request) string {
 	return data[0]
 }
 
-func storeData(request string, response string) {
-	timestamp := time.Now().Format(time.RFC3339)
-	err := storage.Request(timestamp, []byte(request))
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = storage.Response(timestamp, []byte(response))
+func storeData(request string) {
+	err := storage.Request([]byte(request))
 	if err != nil {
 		fmt.Println(err)
 	}

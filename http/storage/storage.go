@@ -1,58 +1,32 @@
 package storage
 
 import (
-	"github.com/boltdb/bolt"
 	"log"
+	"os"
 )
 
-const (
-	dbName     = "DB"
-	dbRequest  = "REQUEST"
-	dbResponse = "RESPONSE"
-)
-
-var db *bolt.DB
+var data *os.File
 
 func init() {
-	var err error
-	db, err = bolt.Open("../storage.db", 0600, nil)
+	err := os.MkdirAll("data", 0600)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = db.Update(func(tx *bolt.Tx) error {
-		root, err := tx.CreateBucketIfNotExists([]byte(dbName))
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = root.CreateBucketIfNotExists([]byte(dbRequest))
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = root.CreateBucketIfNotExists([]byte(dbResponse))
-		if err != nil {
-			log.Fatal(err)
-		}
-		return nil
-	})
+	data, err = os.OpenFile("data/data.txt", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0700)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func Request(timestamp string, request []byte) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(dbName)).Bucket([]byte(dbRequest))
-		return bucket.Put([]byte(timestamp), request)
-	})
-}
-
-func Response(timestamp string, response []byte) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(dbName)).Bucket([]byte(dbResponse))
-		return bucket.Put([]byte(timestamp), response)
-	})
+func Request(request []byte) error {
+	_, err := data.Write(request)
+	if err != nil {
+		return err
+	}
+	_, err = data.WriteString("\n")
+	return err
 }
 
 func Shutdown() error {
-	return db.Close()
+	return data.Close()
 }
