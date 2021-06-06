@@ -149,7 +149,7 @@ The response data holds a server time in the same format. Example: `A10000000000
 
 _Sends body data._
 
-The request data consist of three parts. The first part is always `01b8`. It could be a type of data like weight, fat, and so on. The second part is the time of measurement e.g. `13262d3c`. The third part is the data itself e.g. `1a68`. Example: `24BBBBBBBBBBBBSSSSSSSSSSSS01b813262d3c1a680000NN000000000000CCCCCCCC`.
+The request data consist of three parts. The first part consists of four digits, e.g., `01b8`. The first pair seems to be a descending sequence. The second pair is either `b8` or rarely `f8` in my case. The part's purpose remains unclear. The second part is the time of measurement e.g. `13262d3c` (eight digits). The third part is the data itself e.g. `1a68` (four digits). Example: `24BBBBBBBBBBBBSSSSSSSSSSSS01b813262d3c1a680000NN000000000000CCCCCCCC`.
 
 The response data is always `01000000`. That means that the response is constant: `A0 0000000000000001000000000000000000000000000000bec650a1`.
 

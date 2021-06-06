@@ -2,6 +2,7 @@ package ntp
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -21,7 +22,7 @@ func FromHex(hex string) (time.Time, error) {
 
 func ToHex(t time.Time) string {
 	dec := t.Unix() - baseline
-	return strconv.FormatInt(dec, 16)
+	return fmt.Sprintf("%08x", dec)
 }
 
 func calcBaseline() int64 {
