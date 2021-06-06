@@ -19,6 +19,10 @@ type Weight struct {
 	Weight int
 }
 
+func (w Weight) GetWeight() float64 {
+	return float64(w.Weight) / 100
+}
+
 func ParseData(request string) (Weight, error) {
 	if len(request) != length {
 		return Weight{}, fmt.Errorf("expected length is %d, got %d", length, len(request))

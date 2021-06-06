@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"weight-interceptor-http/dataprocessor"
 	"weight-interceptor-http/dataservice/hash"
 	"weight-interceptor-http/storage"
 )
@@ -17,7 +18,13 @@ var responders = map[string]responder{
 	"29": termination{},
 }
 
+var processors = [2]dataprocessor.Processor{
+	dataprocessor.FitProcessor{},
+	dataprocessor.RawProcessor{},
+}
+
 func StartService() {
+	go dataprocessor.RetryAll()
 	defer func() {
 		err := storage.Shutdown()
 		if err != nil {
@@ -46,7 +53,14 @@ func dataService(writer http.ResponseWriter, request *http.Request) {
 		code = data[:2]
 	}
 	if code == "24" {
-		go func() { storeData(data) }()
+		go func() {
+			for _, processor := range processors {
+				if err := processor.Process(data); err != nil {
+					log.Printf("Stopped processing due to error: %v\n", err)
+					break
+				}
+			}
+		}()
 	}
 	responder := responders[code]
 	if responder == nil {
@@ -66,11 +80,4 @@ func extractData(request *http.Request) string {
 		return ""
 	}
 	return data[0]
-}
-
-func storeData(request string) {
-	err := storage.Request([]byte(request))
-	if err != nil {
-		fmt.Println(err)
-	}
 }
