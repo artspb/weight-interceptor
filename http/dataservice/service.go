@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"weight-interceptor-http/dataservice/hash"
-	"weight-interceptor-http/dns"
 	"weight-interceptor-http/storage"
 )
 
@@ -16,12 +15,10 @@ var responders = map[string]responder{
 	"24": dataTransmission{},
 	"22": terminationRequest{},
 	"29": termination{},
-	"":   unknown{},
 }
 
 func StartService() {
 	defer func() {
-		dns.Shutdown()
 		err := storage.Shutdown()
 		if err != nil {
 			log.Fatal(err)
@@ -56,7 +53,7 @@ func dataService(writer http.ResponseWriter, request *http.Request) {
 		log.Printf("Uknown request code: %s\n", request.URL.RequestURI())
 		responder = responders[""]
 	}
-	response := responder.respond(request.URL)
+	response := responder.respond()
 	_, err = writer.Write([]byte(response))
 	if err != nil {
 		log.Println(err)

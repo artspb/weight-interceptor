@@ -26,13 +26,7 @@ The service acts as a proxy between Web Box and the original HTTP server. It per
 1. Finds data in the request.
 2. Verifies CRC32 checksum.
 3. Prepares its own response.
-4. Finds the IP of the original server using an external DNS server.
-5. Queries the original server.
-6. Compares the server response with its own.
-7. Returns either the server response or its own if the server doesn't respond.
-8. Stores intercepted body data.
-
-An external DNS server is used as it's expected that the local one resolves the target host to the local address. By default, Google Public DNS (`8.8.8.8`) is queried.
+4. Stores intercepted body data.
 
 ### building
 
