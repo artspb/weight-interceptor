@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Build" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="weight-interceptor-http" />
+    <working_directory value="$PROJECT_DIR$" />
+    <go_parameters value="-o interceptor" />
+    <envs>
+      <env name="GOOS" value="linux" />
+      <env name="GOARCH" value="amd64" />
+    </envs>
+    <kind value="PACKAGE" />
+    <package value="weight-interceptor-http" />
+    <directory value="$PROJECT_DIR$/" />
+    <filePath value="$PROJECT_DIR$/main.go" />
+    <option name="run" value="false" />
+    <method v="2" />
+  </configuration>
+</component>
