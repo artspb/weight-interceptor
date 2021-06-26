@@ -72,3 +72,22 @@ func RetryAll() {
 		fmt.Printf("Retry has been finished successfully (%d sent, %d postponed)\n", success, failure)
 	}
 }
+
+type CsvProcessor struct{}
+
+func (CsvProcessor) IsAvailable() bool {
+	return true
+}
+
+func (CsvProcessor) Process(data string) error {
+	weight, err := parser.ParseData(data)
+	if err != nil {
+		log.Printf("Unable to parse data: %v\n", err)
+		return nil
+	}
+	err = storage.StoreWeightToCsv(weight)
+	if err != nil {
+		log.Printf("Unable to store data: %v\n", err)
+	}
+	return nil
+}

@@ -18,8 +18,9 @@ var responders = map[string]responder{
 	"29": termination{},
 }
 
-var processors = [2]dataprocessor.Processor{
+var processors = [3]dataprocessor.Processor{
 	dataprocessor.FitProcessor{},
+	dataprocessor.CsvProcessor{},
 	dataprocessor.RawProcessor{},
 }
 
