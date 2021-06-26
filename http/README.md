@@ -39,6 +39,26 @@ To build the service, the minimal version of Go 1.13 is required.
 * the binary from the previous step: `./intercept`
 * the sources: `go run weight-inteceptor-http`
 
+## Configuration
+
+In a single-user environment, no special configuration is required. If several people are using a scale, it might make sense to add `data/users.txt` that's intended to provide a mapping between users and their weight. The file format is simple. Each line should contain a username and their weight range separated by a space. For instance, `jack 80 100`. Such file can be created even for a single user. If it's absent, the name `default` is used.
+
+## Data processors
+
+### Raw data
+
+The processor stores a raw request that contains weight to `data/data.txt`. It can serve as a backup. Also, it doesn't split data between users. A post-processing is required to extract timestamp and weight.
+
+### CSV
+
+The processor creates a CSV file for each user. It can be easily read by humans without additional manipulations with data. The CSV files are located under `data` and named after users, e.g., `jack.csv`.
+
+### Google Fit
+
+An additional configuration is required to start using this data processor. First, one need to create an app and register an OAuth client according to [this instruction](https://developers.google.com/fit/rest/v1/get-started). The only required permission is `fitness.body.write`. The credentials have to be placed under `data/credentials.json` (the file can be downloaded from [Google Console](https://console.cloud.google.com/apis/credentials)). Second, one has to authenticate each user, e.g., `interceptor fit jack`. The procedure is interactive and requires opening a URL and pasting a token. The token is then stored in a JSON file, e.g., `data/jack.json`.
+
+The processor sends weight to a corresponding Google Account. If the procedure fails, it stores the data and performs a retry next time the weight arrives. Additionally, the retry is performed on the application start.
+
 ## Communication protocol
 
 Web Box sends a GET request in the following form every ten seconds.
