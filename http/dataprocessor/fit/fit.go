@@ -23,6 +23,26 @@ func IsAvailable() bool {
 	return err == nil
 }
 
+func Authenticate(user string) error {
+	path := fmt.Sprintf("data/%s.json", user)
+	token, err := storage.ReadTokenFromFile(path)
+	if err != nil {
+		config, err := getConfig()
+		if err != nil {
+			return err
+		}
+		token, err = getTokenFromWeb(config)
+		if err != nil {
+			return err
+		}
+		err = storage.SaveTokenToFile(path, token)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func AddWeight(weight parser.Weight) error {
 	user, err := storage.FindUser(weight.GetWeight())
 	if err != nil {
@@ -40,6 +60,23 @@ func AddWeight(weight parser.Weight) error {
 }
 
 func getService(user string) (*fitness.Service, error) {
+	config, err := getConfig()
+	if err != nil {
+		return nil, err
+	}
+	client, err := getClient(config, user)
+	if err != nil {
+		return nil, err
+	}
+	ctx := context.Background()
+	service, err := fitness.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return nil, fmt.Errorf("unable to create fitness client: %w", err)
+	}
+	return service, nil
+}
+
+func getConfig() (*oauth2.Config, error) {
 	bytes, err := ioutil.ReadFile(credentialsPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read client secret file: %w", err)
@@ -48,30 +85,14 @@ func getService(user string) (*fitness.Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse client secret file to config: %w", err)
 	}
-	ctx := context.Background()
-	client, err := getClient(config, user)
-	if err != nil {
-		return nil, err
-	}
-	service, err := fitness.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return nil, fmt.Errorf("unable to create fitness client: %w", err)
-	}
-	return service, nil
+	return config, nil
 }
 
 func getClient(config *oauth2.Config, user string) (*http.Client, error) {
 	path := fmt.Sprintf("data/%s.json", user)
 	token, err := storage.ReadTokenFromFile(path)
 	if err != nil {
-		token, err = getTokenFromWeb(config)
-		if err != nil {
-			return nil, err
-		}
-		err := storage.SaveTokenToFile(path, token)
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	return config.Client(context.Background(), token), nil
 }
@@ -85,7 +106,7 @@ func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 		return nil, fmt.Errorf("unable to read authorization code: %w", err)
 	}
 
-	token, err := config.Exchange(context.TODO(), authCode)
+	token, err := config.Exchange(context.Background(), authCode)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve token from web: %w", err)
 	}
