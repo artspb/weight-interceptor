@@ -12,7 +12,7 @@ Web Connect service consists of three components: Scale, Web Box, and an HTTP se
 
 ## Web Box description
 
-Web Box is a bridge between a scale and Internet. It connects to a router via a LAN cable. IP address can be configured either via DHCP or set manually. It sends body data via unencrypted HTTP/1.1 to `bridge1.soehnle.de`. The later allows to intercept information and redirect it to a desired location. In order to do this, one need to have a device with a LAN port and perform the following steps using it.
+Web Box is a bridge between a scale and Internet. It connects to a router via a LAN cable. IP address can be configured either via DHCP or set manually. It sends body data via unencrypted HTTP/1.1 to `bridge1.soehnle.de`. The latter allows to intercept information and redirect it to a desired location. In order to do this, one need to have a device with a LAN port and perform the following steps using it.
 
 1. Configure a DNS server to resolve `bridge1.soehnle.de` to a local IP address. One can use [this instruction](https://www.digitalocean.com/community/tutorials/how-to-configure-bind-as-a-private-network-dns-server-on-ubuntu-18-04) for Ubuntu 18.04 or find a similar one for the desired OS.
 2. Configure a DHCP server to return the IP address of the DNS server from the previous step. [This article](
@@ -36,7 +36,7 @@ To build the service, the minimal version of Go 1.13 is required.
 
 ### running
 
-* the binary from the previous step: `./intercept`
+* the binary from the previous step: `./interceptor`
 * the sources: `go run weight-inteceptor-http`
 
 ## Configuration
@@ -69,27 +69,27 @@ The `%request%` part is a 68 symbols long string. Each symbol is a hex number of
 
 `IIBBBBBBBBBBBBSSSSSSSSSSSSDDDDDDDDDDDDDDDD0000NN000000000000CCCCCCCC`
 
-Code | Length | Description
---- | ---: | ---
-I | 2 | Command
-B | 12 | Bridge ID (written on the device)
-S | 12 | (?) Scale ID, only with code 24
-D | 16 | Data
-0 | 4 | Always zero
-N | 2 | (?), only with code 24
-0 | 12 | Always zero
-C | 8 | CRC32 with the IEEE 802.3 polynomial
+| Code | Length | Description                          |
+|------|-------:|--------------------------------------|
+| I    |      2 | Command                              |
+| B    |     12 | Bridge ID (written on the device)    |
+| S    |     12 | (?) Scale ID, only with code 24      |
+| D    |     16 | Data                                 |
+| 0    |      4 | Always zero                          |
+| N    |      2 | (?), only with code 24               |
+| 0    |     12 | Always zero                          |
+| C    |      8 | CRC32 with the IEEE 802.3 polynomial |
 
 Command can be one of the following.
 
-Code | Description
---- | ---
-25 | Sync request
-28 | Sync
-21 | Sync response
-24 | Data transmission
-22 | Termination request
-29 | Termination
+| Code | Description         |
+|------|---------------------|
+| 25   | Sync request        |
+| 28   | Sync                |
+| 21   | Sync response       |
+| 24   | Data transmission   |
+| 22   | Termination request |
+| 29   | Termination         |
 
 They can be divided in the following groups: sync, data, termination. Commands inside a group always go together. Each session consists of either a sync, a data, or both in the order sync-data always followed by the termination.
 
@@ -99,22 +99,22 @@ The server responds with a `200 OK` message. Its body consists of another hex nu
 
 `RR00000000000000DDDDDDDD000000000000000000000000CCCCCCCC`
 
-Code | Length | Description
---- | ---: | ---
-RR | 2 | Response code
-0 | 14 | Always zero
-D | 8 | Data
-0 | 24 | Always zero
-C | 8 | CRC32 with the IEEE 802.3 polynomial
+| Code | Length | Description                          |
+|------|-------:|--------------------------------------|
+| RR   |      2 | Response code                        |
+| 0    |     14 | Always zero                          |
+| D    |      8 | Data                                 |
+| 0    |     24 | Always zero                          |
+| C    |      8 | CRC32 with the IEEE 802.3 polynomial |
 
 Here are possible response codes.
 
-Code | Description
---- | ---
-A0 | Response to `25` or `24`
-A5 | Response to `28`
-A1 | Response to `21`
-A2 | Response to `22`
+| Code | Description              |
+|------|--------------------------|
+| A0   | Response to `25` or `24` |
+| A5   | Response to `28`         |
+| A1   | Response to `21`         |
+| A2   | Response to `22`         |
 
 `29` never gets a response. Below is an example of communication.
 
