@@ -1,6 +1,7 @@
 package dataprocessor
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"weight-interceptor-http/dataprocessor/fit"
@@ -42,7 +43,7 @@ func (FitProcessor) Process(data string) error {
 		return nil
 	}
 	err = fit.AddWeight(weight)
-	if err != nil && err != storage.UnknownUser {
+	if err != nil && !errors.Is(err, storage.UnknownUser) {
 		log.Printf("Unable to submit data: %v\n", err)
 		err := storage.AddRetry([]byte(data))
 		if err != nil {

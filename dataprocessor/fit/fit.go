@@ -7,7 +7,6 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/fitness/v1"
 	"google.golang.org/api/option"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -77,7 +76,7 @@ func getService(user string) (*fitness.Service, error) {
 }
 
 func getConfig() (*oauth2.Config, error) {
-	bytes, err := ioutil.ReadFile(credentialsPath)
+	bytes, err := os.ReadFile(credentialsPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read client secret file: %w", err)
 	}
