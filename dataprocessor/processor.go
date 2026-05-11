@@ -63,7 +63,8 @@ func RetryAll() {
 		}
 		err = fit.AddWeight(weight)
 		if err != nil {
-			log.Printf("Unable to submit data during retry: %v\n", err)
+			user, _ := storage.FindUser(weight.GetWeight())
+			log.Printf("Unable to submit data during retry for %s: %v\n", user, err)
 		}
 		return err
 	})
