@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/oauth2"
 	"log"
 	"os"
+
+	"golang.org/x/oauth2"
 )
 
 func ReadTokenFromFile(path string) (*oauth2.Token, error) {

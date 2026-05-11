@@ -3,16 +3,17 @@ package fit
 import (
 	"context"
 	"fmt"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/fitness/v1"
-	"google.golang.org/api/option"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"weight-interceptor-http/parser"
 	"weight-interceptor-http/storage"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/fitness/v1"
+	"google.golang.org/api/option"
 )
 
 const credentialsPath = "data/credentials.json"

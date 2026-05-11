@@ -32,7 +32,7 @@ func ParseData(request string) (Weight, error) {
 	}
 	crc, err := hash.Checksum(request[0:60])
 	if err != nil {
-		return Weight{}, fmt.Errorf("unable to compute checksun: %w", err)
+		return Weight{}, fmt.Errorf("unable to compute checksum: %w", err)
 	}
 	if crc != request[60:68] {
 		return Weight{}, fmt.Errorf("expected crc is %s, got %s", crc, request[60:68])
