@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"weight-interceptor-http/parser"
@@ -26,7 +27,7 @@ func IsAvailable() bool {
 func Authenticate(user string) error {
 	path := fmt.Sprintf("data/%s.json", user)
 	token, err := storage.ReadTokenFromFile(path)
-	if err != nil {
+	if err != nil || !token.Valid() {
 		config, err := getConfig()
 		if err != nil {
 			return err
@@ -98,12 +99,22 @@ func getClient(config *oauth2.Config, user string) (*http.Client, error) {
 }
 
 func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
+	config.RedirectURL = "http://localhost"
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Open the following URL in your browser: \n%v\n", authURL)
+	fmt.Printf("Go to the following link in your browser then paste the full redirect URL: \n%v\n", authURL)
 
-	var authCode string
-	if _, err := fmt.Scan(&authCode); err != nil {
-		return nil, fmt.Errorf("unable to read authorization code: %w", err)
+	var redirectURL string
+	if _, err := fmt.Scan(&redirectURL); err != nil {
+		return nil, fmt.Errorf("unable to read redirect URL: %w", err)
+	}
+
+	parsed, err := url.Parse(redirectURL)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse redirect URL: %w", err)
+	}
+	authCode := parsed.Query().Get("code")
+	if authCode == "" {
+		return nil, fmt.Errorf("no code found in redirect URL")
 	}
 
 	token, err := config.Exchange(context.Background(), authCode)
